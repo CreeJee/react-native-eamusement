@@ -13,7 +13,34 @@ A,B,E class및 convertSID관련 참조 문서
 
 `$ npm install react-native-eamusement --save`
 
+## Postinstall process
+### xml/aid_list.xml
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<host-nfcf-service xmlns:android="http://schemas.android.com/apk/res/android">
+    <system-code-filter android:name="4000" />
+    <nfcid2-filter android:name="null" />
+</host-nfcf-service>
 
+```
+### manifest.xml
+```xml
+    <uses-feature android:name="android.hardware.nfc.hcef" android:required="true"/>
+    <uses-permission android:name="android.permission.NFC"/>
+    <application ...>
+        <service android:name=".com.creejee.rneamusement.RNEamusementService"
+        android:exported="true"
+        android:enabled="false"
+        android:permission="android.permission.BIND_NFC_SERVICE">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_NFCF_SERVICE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.cardemulation.host_nfcf_service"
+                android:resource="@xml/nfc_setting" />
+        </service>
+    </application>
+```
 
 ### Mostly automatic installation
 
