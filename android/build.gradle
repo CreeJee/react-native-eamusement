@@ -1,0 +1,77 @@
+buildscript {
+    ext.safeExtGet = {prop, fallback ->
+        rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath('com.android.tools.build:gradle:4.2.2')
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${safeExtGet('kotlinVersion', '1.6.10')}"
+    }
+}
+
+def isNewArchitectureEnabled() {
+    // To opt-in for the New Architecture, you can either:
+    // - Set `newArchEnabled` to true inside the `gradle.properties` file
+    // - Invoke gradle with `-newArchEnabled=true`
+    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
+    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+}
+
+if (isNewArchitectureEnabled()) {
+    apply plugin: "com.facebook.react"
+}
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion safeExtGet('compileSdkVersion', 28)
+
+    defaultConfig {
+        minSdkVersion safeExtGet('minSdkVersion', 24)
+        targetSdkVersion safeExtGet('targetSdkVersion', 24)
+        versionCode 1
+        versionName "1.0"
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+    }
+    lintOptions {
+        abortOnError false
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+repositories {
+    maven {
+        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+        // Matches the RN Hello World template
+        // https://github.com/facebook/react-native/blob/1e8f3b11027fe0a7514b4fc97d0798d3c64bc895/local-cli/templates/HelloWorld/android/build.gradle#L21
+        url "$projectDir/../node_modules/react-native/android"
+    }
+    mavenCentral()
+    mavenLocal()
+    google()
+}
+
+dependencies {
+    if (isNewArchitectureEnabled()) {
+        implementation project(":ReactAndroid")
+    } else {
+        implementation 'com.facebook.react:react-native:+'
+    }
+    implementation "androidx.core:core-ktx:1.7.0"
+}
+
+if (isNewArchitectureEnabled()) {
+    react {
+        reactRoot = rootProject.file("../node_modules/react-native/")
+        jsRootDir = file("../src/main")
+        codegenDir = rootProject.file("../node_modules/react-native-codegen/")
+        libraryName = "rneamusement"
+        codegenJavaPackageName = "com.creejee.rneamusement"
+    }
+}

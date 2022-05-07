@@ -1,0 +1,16 @@
+<!-- AndroidManifest.xml -->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.creejee.rneamusement">
+    <uses-feature android:name="android.hardware.nfc.hcef" android:required="true"/>
+    <uses-permission android:name="android.permission.NFC"/>
+    
+    <service android:name=".RNEamusementService"
+    android:exported="true"
+    android:permission="android.permission.BIND_NFC_SERVICE">
+        <intent-filter>
+            <action android:name="android.nfc.cardemulation.action.HOST_NFCF_SERVICE"/>
+        </intent-filter>
+        <meta-data android:name="android.nfc.cardemulation.host_nfcf_service" android:resource="@xml/nfc_setting"/>
+    </service>
+</manifest>
