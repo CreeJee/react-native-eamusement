@@ -28,7 +28,7 @@ A,B,E class및 convertSID관련 참조 문서
     <uses-feature android:name="android.hardware.nfc.hcef" android:required="true"/>
     <uses-permission android:name="android.permission.NFC"/>
     <application ...>
-        <service android:name=".com.creejee.rneamusement.RNEamusementService"
+        <service android:name="com.creejee.rneamusement.RNEamusementService"
         android:exported="true"
         android:enabled="false"
         android:permission="android.permission.BIND_NFC_SERVICE">
