@@ -1,10 +1,10 @@
 package com.creejee.rneamusement.hcef;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.nfc.NfcAdapter;
 import android.nfc.cardemulation.NfcFCardEmulation;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,32 +17,65 @@ import com.facebook.react.bridge.Promise;
 import java.util.Map;
 import java.util.HashMap;
 
+import com.creejee.rneamusement.RNEamusementService;
+import com.creejee.rneamusement.util.Logging;
+
 public class HcefModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
     NfcAdapter nfcAdapter = null;
     NfcFCardEmulation nfcFCardEmulation = null;
     ComponentName componentName = null;
+
     Boolean isHceFEnabled = false;
     Boolean isHceFSupport = false;
+
+
+    private boolean safeServiceEnable() {
+        Activity activity = getCurrentActivity();
+        if(nfcFCardEmulation != null && componentName != null){
+            return nfcFCardEmulation.enableService(activity, componentName);
+        }
+        return false;
+    }
+
+    private boolean safeServiceDisable() {
+        Activity activity = getCurrentActivity();
+        if(nfcFCardEmulation != null && componentName != null){
+            return nfcFCardEmulation.disableService(activity);
+        }
+        return false;
+    }
 
     public HcefModule(ReactApplicationContext context) {
         super(context);
         context.addLifecycleEventListener(this);
 
         // HCE-F Feature Check
-        PackageManager manager = context.getPackageManager();
-        if(!manager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF)){
+        PackageManager packageManager = context.getPackageManager();
+        if(!packageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF)){
             return ;
         }
         isHceFSupport = true;
 
-        nfcAdapter = NfcAdapter.getDefaultAdapter(getReactApplicationContext());
+        // HCE-F Enable
+        nfcAdapter = NfcAdapter.getDefaultAdapter(context);
         if(nfcAdapter != null){
             nfcFCardEmulation = NfcFCardEmulation.getInstance(nfcAdapter);
-            componentName = new ComponentName("tk.nulldori.eamemu","tk.nulldori.eamemu.eAMEMuService");
+            componentName = new ComponentName(context, RNEamusementService.class);
             if(nfcFCardEmulation != null){
                 nfcFCardEmulation.registerSystemCodeForService(componentName, "4000");
                 isHceFEnabled = true;
             }
+        }
+        // Flag Service
+
+        if(packageManager.getComponentEnabledSetting(componentName) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
+            packageManager.getComponentEnabledSetting(componentName) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER ) {
+            Logging.d("Service disabled, so we will force flag service");
+            packageManager.setComponentEnabledSetting(
+                componentName,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP
+            );
         }
     }
 
@@ -57,6 +90,10 @@ public class HcefModule extends ReactContextBaseJavaModule implements LifecycleE
         final Map<String, Object> constants = new HashMap<>();
         constants.put("support", isHceFSupport);
         constants.put("enabled", isHceFEnabled);
+        constants.put("HCEF_FATAL_ERROR", HcefErrorCode.FATAL_ERROR);
+        constants.put("HCEF_UID_HEX_ERROR", HcefErrorCode.UID_HEX_ERROR);
+        constants.put("HCEF_UID_LENGTH_ERROR", HcefErrorCode.UID_LENGTH_ERROR);
+        constants.put("HCEF_UID_PREFIX_ERROR", HcefErrorCode.UID_PREFIX_ERROR);
         return constants;
     }
 
@@ -82,49 +119,45 @@ public class HcefModule extends ReactContextBaseJavaModule implements LifecycleE
     @ReactMethod
     void enableService(Promise promise){
         if(nfcFCardEmulation == null || componentName == null){
-            promise.reject("NULL_ERROR", "nfcFCardEmulation or componentName is null");
+            promise.reject(HcefErrorCode.FATAL_ERROR, "nfcFCardEmulation or componentName is null");
         }
 
         String cardId = nfcFCardEmulation.getNfcid2ForService(componentName);
-
         if(cardId.length() != 16)
-            promise.reject("LENGTH_ERROR", "The length of sid must be 16");
+            promise.reject(HcefErrorCode.UID_LENGTH_ERROR, "The length of sid must be 16");
         if(!cardId.matches("[0-9a-fA-F]+"))
-            promise.reject("HEX_ERROR", "SID must be 16-digit hex number");
+            promise.reject(HcefErrorCode.UID_HEX_ERROR, "SID must be 16-digit hex number");
         if(!cardId.substring(0, 4).contentEquals("02FE"))
-            promise.reject("PREFIX_ERROR", "SID must be start with 02FE");
+            promise.reject(HcefErrorCode.UID_PREFIX_ERROR, "SID must be start with 02FE");
 
-        // Toast.makeText(getReactApplicationContext(), "Card Emulation Enabled!", Toast.LENGTH_SHORT).show();
-        promise.resolve(nfcFCardEmulation.enableService(getCurrentActivity(), componentName));
+        promise.resolve(safeServiceEnable());
     }
 
     @ReactMethod
     void disableService(Promise promise){
-        if(nfcFCardEmulation == null || componentName == null){
-            promise.reject("NULL_ERROR", "nfcFCardEmulation or componentName is null");
+        boolean isDisabled = safeServiceDisable();
+        if(isDisabled){
+            promise.reject(HcefErrorCode.FATAL_ERROR, "nfc service disable failed");
         }
-        // Toast.makeText(getReactApplicationContext(), "Card Emulation Disabled...", Toast.LENGTH_SHORT).show();
-        promise.resolve(nfcFCardEmulation.disableService(getCurrentActivity()));
     }
 
     @Override
     public void onHostResume(){
-        if(nfcFCardEmulation != null && componentName != null){
-            Log.d("MainActivity onResume()", "enabled!");
-            nfcFCardEmulation.enableService(getCurrentActivity(), componentName);
-        }
+
+
+        Logging.d("MainActivity onResume()");
+        safeServiceEnable();
     }
 
     @Override
     public void onHostPause(){
-        if(nfcFCardEmulation != null && componentName != null){
-            Log.d("MainActivity onPause()", "disabled...");
-            nfcFCardEmulation.disableService(getCurrentActivity());
-        }
+        Logging.d("MainActivity onPause()");
+        safeServiceDisable();
     }
 
     @Override
     public void onHostDestroy(){
-
+        Logging.d("MainActivity onHostDestroy()");
+        safeServiceDisable();
     }
 }
