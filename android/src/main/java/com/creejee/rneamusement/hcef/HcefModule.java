@@ -135,10 +135,10 @@ public class HcefModule extends ReactContextBaseJavaModule implements LifecycleE
 
     @ReactMethod
     void disableService(Promise promise){
-        boolean isDisabled = safeServiceDisable();
-        if(isDisabled){
-            promise.reject(HcefErrorCode.FATAL_ERROR, "nfc service disable failed");
+        if(nfcFCardEmulation == null || componentName == null){
+            promise.reject(HcefErrorCode.FATAL_ERROR, "nfcFCardEmulation or componentName is null");
         }
+        promise.resolve(safeServiceDisable());
     }
 
     @Override
