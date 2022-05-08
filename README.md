@@ -37,7 +37,7 @@ A,B,E class및 convertSID관련 참조 문서
             </intent-filter>
             <meta-data
                 android:name="android.nfc.cardemulation.host_nfcf_service"
-                android:resource="@xml/nfc_setting" />
+                android:resource="@xml/aid_list" />
         </service>
     </application>
 ```
