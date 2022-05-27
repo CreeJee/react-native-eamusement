@@ -1,4 +1,4 @@
-package com.creejee.rneamusement.CardConvert;
+package com.creejee.rneamusement.cardConvert;
 
 
 import androidx.annotation.NonNull;

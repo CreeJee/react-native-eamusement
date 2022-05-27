@@ -2,7 +2,7 @@ package com.creejee.rneamusement;
 
 import androidx.annotation.NonNull;
 
-import com.creejee.rneamusement.CardConvert.CardConvertModule;
+import com.creejee.rneamusement.cardConvert.CardConvertModule;
 import com.creejee.rneamusement.hcef.HcefModule;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
