@@ -2,6 +2,6 @@
 
 import { NativeModules } from 'react-native';
 
-export const { EamusementHcef, CardConvertModule } = NativeModules;
+export const { EamusementHcef, EamusementCardConvert } = NativeModules;
 
-export default { EamusementHcef, CardConvertModule };
+export default { EamusementHcef, EamusementCardConvert };
