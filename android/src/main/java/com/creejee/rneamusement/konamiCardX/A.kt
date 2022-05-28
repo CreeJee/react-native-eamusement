@@ -25,7 +25,7 @@ class A {
         return when {
             arg11.uppercase(Locale.getDefault()).startsWith("E004") -> toKonamiID(arg11, 1.toByte())
             arg11.uppercase(Locale.getDefault()).startsWith("0") -> toKonamiID(arg11, 2.toByte())
-            else -> toKonamiID(arg11, 0.toByte())
+            else -> throw RuntimeException("Invalid UID prefix")
         }
     }
 
@@ -91,7 +91,7 @@ class A {
         return when (str[14]) {
             '1' -> toUID(str, 1.toByte())
             '2' -> toUID(str, 2.toByte())
-            else -> throw RuntimeException("Invalid Konami ID")
+            else -> 
         }
     }
 
