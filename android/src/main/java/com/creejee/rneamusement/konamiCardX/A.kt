@@ -91,7 +91,7 @@ class A {
         return when (str[14]) {
             '1' -> toUID(str, 1.toByte())
             '2' -> toUID(str, 2.toByte())
-            else ->  throw RuntimeException("Invalid Konami ID")
+            else -> throw RuntimeException("Invalid Konami ID")
         }
     }
 
