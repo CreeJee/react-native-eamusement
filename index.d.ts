@@ -12,6 +12,8 @@ declare module 'react-native-eamusement' {
         export const HCEF_UID_PREFIX_ERROR = "UID_PREFIX_ERROR";
     }
     export namespace EamusementCardConvert {
-        export function convertSID(sid:string): Promise<string>
+        export function convertKonamiID(nfcID:string): Promise<string>
+        export function convertNfcID(konamiCard:string): Promise<string>
+    }
     }
 }

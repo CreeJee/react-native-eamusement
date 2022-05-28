@@ -25,12 +25,23 @@ public class CardConvertModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    void convertSID(String sid, Promise promise){
+    void convertKonamiID(String sid, Promise promise){
         if(sid.length() != 16 || !sid.startsWith("02FE")){
             promise.reject("SID_FORMAT_ERROR", "SID must be 16-digit hex string.");
         }
 
         String cardID = converter.toKonamiID(sid);
+
+        promise.resolve(cardID);
+    }
+
+    @ReactMethod
+    void convertNfcID(String sid, Promise promise){
+        if(sid.length() != 16 || !sid.startsWith("02FE")){
+            promise.reject("SID_FORMAT_ERROR", "SID must be 16-digit hex string.");
+        }
+
+        String cardID = converter.toUID(sid);
 
         promise.resolve(cardID);
     }
