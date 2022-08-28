@@ -1,4 +1,4 @@
-package com.example.reactnativeeamusement;
+package com.creejee.rneamusement;
 
 import com.facebook.react.ReactActivity;
 

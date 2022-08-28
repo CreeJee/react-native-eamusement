@@ -1,18 +1,27 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-eamusement';
+import { EamusementCardConvert, EamusementHcef } from 'react-native-eamusement';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
+  useEffect(() => {
+    const init = async () => {
+      const uid = await EamusementCardConvert.convertNfcID('67JWR00RUE1E0111');
+      const isSid = await EamusementHcef.setSID(uid);
+      console.log('bindService', isSid);
+      if (isSid) {
+        console.log('bootedService', await EamusementHcef.enableService());
+      }
+    };
+    init();
+    return () => {
+      EamusementHcef.disableService();
+    };
   }, []);
-
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Example</Text>
     </View>
   );
 }
