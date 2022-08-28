@@ -15,5 +15,4 @@ declare module 'react-native-eamusement' {
         export function convertKonamiID(nfcID:string): Promise<string>
         export function convertNfcID(konamiCard:string): Promise<string>
     }
-    }
 }
